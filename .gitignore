@@ -1,0 +1,6 @@
+## ignor csv file used for training
+
+*.csv
+*.RData
+*.Rhistory
+*.txt

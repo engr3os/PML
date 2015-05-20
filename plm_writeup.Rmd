@@ -1,0 +1,110 @@
+---
+title: "Prediction Assignment Writeup"
+author: "Oluwatobi Olabiyi"
+date: "Monday, May 11, 2015"
+output: html_document
+---
+
+## Introduction
+
+This report contains the analysis of activity monitoring data obtained from wearable devices. The data is obtained from https://d396qusza40orc.cloudfront.net/predmachlearn. The task is to develop a model to predict accurately if someone lifts dumbbell correctly based on sensor data placed on the belt, arm, forearm of teh subject and also on the dumbbell itself. 
+
+Before processing the data we will first include the R packages required for our analysis, set the working directory and read in the data of interest.
+
+```{r, echo = T, cache=TRUE, warning=FALSE, comment=F}
+require(stats)
+require(caret)
+setwd("~/Documents/R_Programming/PML")
+training <- read.csv("pml-training.csv")
+testing <- read.csv("pml-testing.csv")
+```
+
+## Exploratory data analysis
+
+Before embarking on prediction modeling,we will conduct  basic exploratory data analysis.
+
+We can take the summary and check the dimension of both the training and testing data sets
+```{r, echo = F }
+summary(training)
+summary(testing)
+```
+```{r}
+dim(training)
+dim(testing)
+```
+
+Both training and testing data sets consiste of 160 variables many of which contains NA. To decide wether to impute the NAs or not, it's importantto find the percentage of the total data set that's NA.
+
+```{r}
+mean(is.na(testing))
+mean(is.na(training))
+```
+Results shows that approximately 41% and 62.5% of training and testing sets contains NAs respectively. With these large proportion of NAs, it is not recommended to impute as the imputed values might introduce bias into the prediction model. Therefore, it is better to remove variables with only NA values as follows.
+
+```{r, echo=T, cache = T}
+pointer <- !is.na(testing)
+nonaCount <- apply(pointer,2, sum)
+nonaset <- nonaCount[nonaCount > 0]
+nonaVar <- names(nonaset)
+test <- testing[,nonaVar]
+train0 <- training[,c(nonaVar[1:59], "classe")]
+```
+We can see that there are about 100 variables with only NA values which should not be included in our machine learning prediction. Having removed the variable with all NA values, the percentage NAs is now zero.
+```{r, cache=TRUE}
+mean(is.na(test))
+mean(is.na(train0))
+```
+## Regression Modeling
+
+Since our test data set does not contain the outcome variable it's important to have a cross validation set  to be able to evaluate the out of sample error of the model. Here we will partition the trimmed training data set `train0` into training and cross validation data sets. 
+
+```{r, echo = T, cache=TRUE}
+set.seed(1234)
+inTrain <- createDataPartition(train0$classe, p =0.7, list = F)
+training0 <- train0[inTrain,]
+cval0 <- train0[-inTrain,]
+```
+We will proceed to fit our model using the training set `training0` and then measure the out of sample error on the cross validation set `cval0`. It's important that we choose a model and set of feature that give very small or no training and crossvalidation error. In fact, for use to rely on the model fit, teh cross-validation has to be very close to the training error. Here we will fit the model using random forest algorithm. The choise of random forest algorithm (or any other tree based algorithm) is to be able to accurately fit the non-linearity between the outcomes and the regressors as can be seen in some pair plots of the variables.
+
+Before performing model fitting on the training set, we first check the features and select as few number of features as will give accurate predictions.
+
+The 59 variable can be grouped into 5 categories:
+* Information variables (1-7)
+* Belt measurement Variables (8-20)
+* Arm measurement variables (21-33)
+* Dumbbell measurement varables (34-46)
+* Forearm measurement variables (47 - 59)
+Each measurement variables contains 13 measurement type namely: roll, pirch, yaw, total accel, accel-x, accel-y, accel-z, gyro-x, gyro-y, gyro-z, magnet-x, magnet-y, magnet-z.
+We will make a pair plot according to the information categories to see if there are any redunndant or confounding variable tat should not be included in the model fit.
+```{r, cache =TRUE}
+pairs(train0[,c(1:7,60)], main = "Information variables, 1-7 and classe")
+pairs(train0[,c(8:20,60)], main = "Belt measurement variable, 8-20 and classe")
+pairs(train0[,c(21:33,60)], main = "Arm measurement variable, 8-20 and classe")
+pairs(train0[,c(34:46,60)], main = "Dumbbell measurement variable, 8-20 and classe")
+pairs(train0[,c(47:60)], main = "Forearm measurement variable, 8-20 and classe")
+```
+As can be seeen on all the plots, it is difficult to identfy the linear depencies within each of the catergories. However, the pairs plot shows that variable X which denotes the serial number of the observations has a linear factor relationship with the outcome "classe" and therefore can introduces unwarranted bias into the model. Therefore, the variable is removed and remaining 57 regressors are used to fit the model. 
+
+```{r, cache =TRUE, warning=FALSE, comment=F}
+modfit <- train(classe ~.-X, data = training0, method = "rf")
+```
+```{r, cache =TRUE}
+modfit$finalModel
+confusionMatrix(cval0$classe, predict(modfit,cval0))
+prediction <- predict(modfit,test)
+print(prediction)
+```
+We can see that both the in sample and out of sample standard errors are very low which shows good selection of regressors and training method. 
+The final model is plotted below:
+```{r, cache=T}
+plot(modfit$finalModel)
+```
+
+## Conclusion
+Perfect (100%) cross validation accuracy shows that appropriate number and type of features were selected. Also it shows that random forest algorithm is a good model fit method for this problem. 
+
+Finally, the results from the test data set are converted into text files and uploaded.
+```{r, eval = FALSE}
+pml_write_files(prediction)
+```
+It's worth mentioning the prediction accuracy based on the test data set is 100%.
