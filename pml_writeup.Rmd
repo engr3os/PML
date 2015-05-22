@@ -1,17 +1,20 @@
 ---
 title: "Prediction Assignment Writeup"
 author: "Oluwatobi Olabiyi"
-date: "Monday, May 11, 2015"
+date: "Wednesday, May 20, 2015"
 output: html_document
 ---
 
+## Summary
+This articles contained prediction analysis conducted on activiti monitoring to correctly predict activity being done based on measurement data. After some data processing, a number of features are selected and use to fit the provided data using random forest algorithm. Both the training and cross-validation has very high accuracy greater than 99.9% and the model gives perfect prediction on test data. This shows thet the devloped model can succesfully predict the type of activity being done with very high accuracy. 
+
 ## Introduction
 
-This report contains the analysis of activity monitoring data obtained from wearable devices. The data is obtained from https://d396qusza40orc.cloudfront.net/predmachlearn. The task is to develop a model to predict accurately if someone lifts dumbbell correctly based on sensor data placed on the belt, arm, forearm of teh subject and also on the dumbbell itself. 
+This report contains the analysis of activity monitoring data obtained from wearable devices. The data is obtained from <https://d396qusza40orc.cloudfront.net/predmachlearn>. The task is to develop a model to predict accurately if someone lifts dumbbell correctly based on sensor data placed on the belt, arm, forearm of teh subject and also on the dumbbell itself. 
 
 Before processing the data we will first include the R packages required for our analysis, set the working directory and read in the data of interest.
 
-```{r, echo = T, cache=TRUE, warning=FALSE, comment=F}
+```{r, echo = T, cache=TRUE, message=FALSE, comment=F}
 require(stats)
 require(caret)
 setwd("~/Documents/R_Programming/PML")
@@ -24,7 +27,7 @@ testing <- read.csv("pml-testing.csv")
 Before embarking on prediction modeling,we will conduct  basic exploratory data analysis.
 
 We can take the summary and check the dimension of both the training and testing data sets
-```{r, echo = F }
+```{r, echo = F, eval=F}
 summary(training)
 summary(testing)
 ```
@@ -69,11 +72,13 @@ We will proceed to fit our model using the training set `training0` and then mea
 Before performing model fitting on the training set, we first check the features and select as few number of features as will give accurate predictions.
 
 The 59 variable can be grouped into 5 categories:
+
 * Information variables (1-7)
 * Belt measurement Variables (8-20)
 * Arm measurement variables (21-33)
 * Dumbbell measurement varables (34-46)
 * Forearm measurement variables (47 - 59)
+
 Each measurement variables contains 13 measurement type namely: roll, pirch, yaw, total accel, accel-x, accel-y, accel-z, gyro-x, gyro-y, gyro-z, magnet-x, magnet-y, magnet-z.
 We will make a pair plot according to the information categories to see if there are any redunndant or confounding variable tat should not be included in the model fit.
 ```{r, cache =TRUE}
@@ -83,28 +88,46 @@ pairs(train0[,c(21:33,60)], main = "Arm measurement variable, 8-20 and classe")
 pairs(train0[,c(34:46,60)], main = "Dumbbell measurement variable, 8-20 and classe")
 pairs(train0[,c(47:60)], main = "Forearm measurement variable, 8-20 and classe")
 ```
+
 As can be seeen on all the plots, it is difficult to identfy the linear depencies within each of the catergories. However, the pairs plot shows that variable X which denotes the serial number of the observations has a linear factor relationship with the outcome "classe" and therefore can introduces unwarranted bias into the model. Therefore, the variable is removed and remaining 57 regressors are used to fit the model. 
 
-```{r, cache =TRUE, warning=FALSE, comment=F}
+```{r, cache =TRUE, warning=T, comment=F, message = F}
 modfit <- train(classe ~.-X, data = training0, method = "rf")
 ```
+
+Belwo is the summary of the the fitted model.
 ```{r, cache =TRUE}
 modfit$finalModel
-confusionMatrix(cval0$classe, predict(modfit,cval0))
-prediction <- predict(modfit,test)
-print(prediction)
 ```
-We can see that both the in sample and out of sample standard errors are very low which shows good selection of regressors and training method. 
+
 The final model is plotted below:
 ```{r, cache=T}
 plot(modfit$finalModel)
 ```
 
+The in-sample error can be calculated using the confussion matrix as shown below
+```{r, cache = T}
+confusionMatrix(train0$classe, predict(modfit,train0))
+```
+The training accuracy as shown above is 99.98%, i.e. training error of 0.02%. Therefore we expect the cross-validation accuracy to be around the same i.e. out of sample error in the neighborhood of 0.01%.
+
+Using the obtained model, we can easily calculate the cross validation error using confusion matrix.
+```{r, cache = T}
+confusionMatrix(cval0$classe, predict(modfit,cval0))
+```
+Just as expected the cross-validation error is approximately 0.05%. We can see that both the in sample and out of sample standard errors are very low which shows good selection of regressors and training method.
+
+Finally, we can used the fitted model to make prediction on test data as shown below
+```{r}
+prediction <- predict(modfit,test)
+print(prediction)
+```
+
 ## Conclusion
-Perfect (100%) cross validation accuracy shows that appropriate number and type of features were selected. Also it shows that random forest algorithm is a good model fit method for this problem. 
+he high cross validation accuracy shows that appropriate number and type of features were selected. Also, it shows that random forest algorithm is a good model fit method for this problem. 
 
 Finally, the results from the test data set are converted into text files and uploaded.
 ```{r, eval = FALSE}
 pml_write_files(prediction)
 ```
-It's worth mentioning the prediction accuracy based on the test data set is 100%.
+It's worth mentioning the prediction accuracy based on the test data set is 100% which futher attest to the accuracy of the training method and proper feature selection. Please not that had we included variable X in the analysis, the prediction gives all "A" predictions to tha test data which validates that X should not included in the predction modelling.
