@@ -2,4 +2,6 @@ base
 lattice
 ggplot2
 caret
+knitr
+xtable
 randomForest
