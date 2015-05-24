@@ -60,7 +60,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 <div id="summary" class="section level2">
 <h2>Summary</h2>
-<p>This articles contained prediction analysis conducted on activiti monitoring to correctly predict activity being done based on measurement data. After some data processing, a number of features are selected and use to fit the provided data using random forest algorithm. Both the training and cross-validation has very high accuracy &gt;99.99% and the model gives perfect prediction on test data. This shows thet the devloped model can succesfully predict the type of activity being done with very high accuracy.</p>
+<p>This article contains prediction analysis conducted on activity monitoring to correctly predict activities being done based on measurement data. After some data processing, a number of features are selected and used to fit the provided data using random forest algorithm. Both the training and cross-validation has very high accuracy greater than 99.9% and the model gives perfect prediction on test data. This shows thet the devloped model can succesfully predict the type of activities being done with very high accuracy.</p>
 </div>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
@@ -74,7 +74,7 @@ testing &lt;- read.csv(&quot;pml-testing.csv&quot;)</code></pre>
 </div>
 <div id="exploratory-data-analysis" class="section level2">
 <h2>Exploratory data analysis</h2>
-<p>Before embarking on prediction modeling,we will conduct basic exploratory data analysis.</p>
+<p>Before embarking on prediction modeling, we will conduct basic exploratory data analysis.</p>
 <p>We can take the summary and check the dimension of both the training and testing data sets</p>
 <pre class="r"><code>dim(training)</code></pre>
 <pre><code>## [1] 19622   160</code></pre>
@@ -113,7 +113,7 @@ cval0 &lt;- train0[-inTrain,]</code></pre>
 <li>Belt measurement Variables (8-20)</li>
 <li>Arm measurement variables (21-33)</li>
 <li>Dumbbell measurement varables (34-46)</li>
-<li>Forearm measurement variables (47 - 59)</li>
+<li>Forearm measurement variables (47-59)</li>
 </ul>
 <p>Each measurement variables contains 13 measurement type namely: roll, pirch, yaw, total accel, accel-x, accel-y, accel-z, gyro-x, gyro-y, gyro-z, magnet-x, magnet-y, magnet-z. We will make a pair plot according to the information categories to see if there are any redunndant or confounding variable tat should not be included in the model fit.</p>
 <pre class="r"><code>pairs(train0[,c(1:7,60)], main = &quot;Information variables, 1-7 and classe&quot;)</code></pre>
@@ -181,7 +181,7 @@ cval0 &lt;- train0[-inTrain,]</code></pre>
 ## Detection Rate         0.2844   0.1935   0.1743   0.1638   0.1838
 ## Detection Prevalence   0.2844   0.1935   0.1744   0.1639   0.1838
 ## Balanced Accuracy      0.9999   0.9998   0.9998   1.0000   1.0000</code></pre>
-<p>The training accuracy as shown above is 99.99%, i.e. training error of 0.01%. Therefore we expect the cross-validation accuracy to be around the same i.e. out of sample error in the neighborhood of 0.01%.</p>
+<p>The training accuracy as shown above is 99.98%, i.e. training error of 0.02%. Therefore we expect the cross-validation accuracy to be around the same i.e. out of sample error in the neighborhood of 0.01%.</p>
 <p>Using the obtained model, we can easily calculate the cross validation error using confusion matrix.</p>
 <pre class="r"><code>confusionMatrix(cval0$classe, predict(modfit,cval0))</code></pre>
 <pre><code>## Confusion Matrix and Statistics
@@ -215,7 +215,7 @@ cval0 &lt;- train0[-inTrain,]</code></pre>
 ## Detection Rate         0.2845   0.1934   0.1742   0.1636   0.1839
 ## Detection Prevalence   0.2845   0.1935   0.1743   0.1638   0.1839
 ## Balanced Accuracy      0.9997   0.9995   0.9994   0.9999   1.0000</code></pre>
-<p>Just as expected the cross-validation error is approximately 0.1%. We can see that both the in sample and out of sample standard errors are very low which shows good selection of regressors and training method.</p>
+<p>Just as expected the cross-validation error is approximately 0.05%. We can see that both the in sample and out of sample standard errors are very low which shows good selection of regressors and training method.</p>
 <p>Finally, we can used the fitted model to make prediction on test data as shown below</p>
 <pre class="r"><code>prediction &lt;- predict(modfit,test)</code></pre>
 <pre><code>## Loading required package: randomForest</code></pre>

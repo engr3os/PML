@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ## Summary
-This articles contained prediction analysis conducted on activiti monitoring to correctly predict activity being done based on measurement data. After some data processing, a number of features are selected and use to fit the provided data using random forest algorithm. Both the training and cross-validation has very high accuracy greater than 99.9% and the model gives perfect prediction on test data. This shows thet the devloped model can succesfully predict the type of activity being done with very high accuracy. 
+This article contains prediction analysis conducted on activity monitoring to correctly predict activities being done based on measurement data. After some data processing, a number of features are selected and used to fit the provided data using random forest algorithm. Both the training and cross-validation has very high accuracy greater than 99.9% and the model gives perfect prediction on test data. This shows thet the devloped model can succesfully predict the type of activities being done with very high accuracy. 
 
 ## Introduction
 
@@ -24,7 +24,7 @@ testing <- read.csv("pml-testing.csv")
 
 ## Exploratory data analysis
 
-Before embarking on prediction modeling,we will conduct  basic exploratory data analysis.
+Before embarking on prediction modeling, we will conduct  basic exploratory data analysis.
 
 We can take the summary and check the dimension of both the training and testing data sets
 ```{r, echo = F, eval=F}
@@ -77,7 +77,7 @@ The 59 variable can be grouped into 5 categories:
 * Belt measurement Variables (8-20)
 * Arm measurement variables (21-33)
 * Dumbbell measurement varables (34-46)
-* Forearm measurement variables (47 - 59)
+* Forearm measurement variables (47-59)
 
 Each measurement variables contains 13 measurement type namely: roll, pirch, yaw, total accel, accel-x, accel-y, accel-z, gyro-x, gyro-y, gyro-z, magnet-x, magnet-y, magnet-z.
 We will make a pair plot according to the information categories to see if there are any redunndant or confounding variable tat should not be included in the model fit.
