@@ -1,5 +1,5 @@
 # PML
-This is Practical Machine Learning class repo
+This is Practical Machine Learning repo
 
 This repo contains the report on prediction of barbell lifting activity using the provided dataset in the course.  
 
